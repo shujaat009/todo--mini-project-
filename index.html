@@ -1,0 +1,216 @@
+<head>
+    
+    <title>TODO APP</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #d6fdd4;
+    padding: 20px;
+    color: #333;
+}
+.container{
+    background-color: #cecad0;
+    padding: 12px;
+    margin: 10px;
+}
+#heading{
+    background-color: #cecad066;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 20%;
+}
+h2{
+    font-size: 30px;
+}
+h4{
+    font-size: 15px;
+}
+
+
+#titleBar{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#descriptionBar{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+input[type="text"] {
+    width: 22%;
+    padding: 12px;
+    margin: -8px 0 20px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+#buttonBar{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button {
+    row-gap: 12px;
+    width: 8%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: 2px solid black;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #5ba55f;
+}
+
+#mainArea {
+    background-color: #827e7e;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+
+    </style>
+    <script>
+
+function deleteDone(id){
+    var elementId = `todo-${id}`;
+    var element = document.getElementById(elementId);
+    if(element) {
+        element.remove(); 
+        console.log("Done delete");
+    }
+}
+    function deleteTodo(id) {
+        fetch("http://localhost:3000/todos/" + id, {
+        method: "DELETE",
+        headers: {
+        "Content-Type": "application/json"
+       }
+    }).then(() => deleteDone(id))
+    }
+
+    function todosCallback(data) {
+    console.log(data);
+    var parentElement = document.getElementById("mainArea");
+
+    for(var i = 0; i < data.length; i++){
+        var childElement = document.createElement("div");
+  
+        childElement.id = `todo-${data[i].id}`; 
+
+        var grandChildElement1 = document.createElement("span");
+        grandChildElement1.innerHTML = data[i].title;
+       
+        var grandChildElement2 = document.createElement("span");
+        grandChildElement2.innerHTML = data[i].description;
+       
+        var grandChildElement3 = document.createElement("button");
+        grandChildElement3.innerHTML = "Delete";
+       
+        grandChildElement3.setAttribute("onclick", `deleteTodo(${data[i].id})`);
+
+        childElement.appendChild(grandChildElement1);
+        childElement.appendChild(grandChildElement2);
+        childElement.appendChild(grandChildElement3);
+
+        parentElement.appendChild(childElement);
+    }
+}
+
+
+
+function getDataCallback(resp){
+    resp.json().then(todosCallback)
+}
+    function getData() {
+        fetch("http://localhost:3000/todos", {
+        method: "GET",
+        }).then(getDataCallback)
+}
+getData();
+
+
+    function parsedResponse(data){
+        console.log(data);
+        var parentElement = document.getElementById("mainArea");
+
+        var childElement = document.createElement("div");
+
+        var grandChildElement1 = document.createElement("span");
+        grandChildElement1.innerHTML = data.title
+        
+        var grandChildElement2 = document.createElement("span");
+        grandChildElement2.innerHTML = data.description
+        
+        var grandChildElement3 = document.createElement("button");
+        grandChildElement3.innerHTML = "Delete"
+        grandChildElement3.setAttribute("onclick", "deleteTodo(" + data.id + ")")
+
+        childElement.appendChild(grandChildElement1);
+        childElement.appendChild(grandChildElement2);
+        childElement.appendChild(grandChildElement3);
+        
+
+        // childElement.innerHTML = data[i].title;
+        parentElement.appendChild(childElement);
+    }
+
+    function callback(resp){
+        resp.json().then(parsedResponse);
+    }
+   function onPress() {
+
+    var title = document.getElementById("title").value;
+    var description = document.getElementById("description").value;
+
+    fetch("http://localhost:3000/todos", {
+        method: "POST",
+        body: JSON.stringify({
+            title: title,
+            description: description 
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(callback)
+   }
+
+
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div id="heading"><h2> Create Todos </h2></div>
+        
+        <div id = titleBar> 
+           <h4> Todo title </h4> 
+            <input type="text" id="title"></input>
+        </div> 
+        <br><br>
+
+        <div id ="descriptionBar">
+           <h4>Title description  </h4> 
+            <input type="text" id="description"></input>
+        </div>
+        <br><br>
+        <div id = "buttonBar">
+            <button onclick="onPress()">send todo </button>
+        </div>
+        <div id="mainArea"> </div>
+    </div>
+</body>
+
+
